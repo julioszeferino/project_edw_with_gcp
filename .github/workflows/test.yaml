@@ -1,0 +1,63 @@
+name: test
+
+on:
+  push:
+    branches: [ '*' ]
+  pull_request:
+    branches: [ '*' ]
+
+env:
+  TF_VAR_project_id: ${{ secrets.GCP_PROJECT_ID }}
+  GOOGLE_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
+  GOOGLE_REGION: us-central1
+  GOOGLE_BACKEND_BUCKET: terraform-state-infra-julioszeferino
+
+jobs:
+
+  test:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        python_version: ['3.12']
+        os: ['ubuntu-22.04']
+    
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python_version }}
+
+    - name: Install dependencies and run tests
+      run: |
+        python -m pip install --upgrade pip
+        cd conectorcsv
+        pip install -r requirements.txt
+        cd ..
+        pytest
+
+    - name: Build app
+      run: |
+        sh init.sh
+        
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v2
+      with:
+        terraform_version: 1.5.7
+
+    - name: Terraform Init
+      id: init
+      run: terraform init -backend-config="bucket=$GOOGLE_BACKEND_BUCKET"
+      env:
+        GOOGLE_BACKEND_BUCKET: ${{ env.GOOGLE_BACKEND_BUCKET }}
+
+    - name: Terraform Validate
+      id: validate
+      run: terraform validate -no-color
+
+    - name: Terraform Plan
+      id: plan
+      run: terraform plan -no-color
+      continue-on-error: false
