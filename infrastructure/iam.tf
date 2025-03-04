@@ -43,3 +43,24 @@ resource "google_cloud_run_service_iam_member" "permissao_exec_function" {
   ]
 }
 
+
+resource "google_project_iam_member" "permissao_eventarc" {
+  project = var.project_id
+  role    = "roles/eventarc.admin"
+  member  = "serviceAccount:${google_service_account.contaservico.email}"
+}
+
+resource "google_project_iam_member" "permissao_service_agent" {
+  project = var.project_id
+  role    = "roles/cloudfunctions.serviceAgent"
+  member  = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-cloudfunctions.iam.gserviceaccount.com"
+}
+
+data "google_project" "project" {}
+
+resource "google_project_iam_member" "permissao_token_creator" {
+  project = var.project_id
+  role    = "roles/iam.serviceAccountTokenCreator"
+  member  = "serviceAccount:${google_service_account.contaservico.email}"
+}
+
