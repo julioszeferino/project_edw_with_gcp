@@ -3,7 +3,8 @@ resource "google_project_service" "funcao_apis_necessarias" {
     "cloudfunctions.googleapis.com",
     "storage.googleapis.com",
     "cloudbuild.googleapis.com",
-    "eventarc.googleapis.com"
+    "eventarc.googleapis.com",
+    "run.googleapis.com"
   ])
   
   service            = each.key
@@ -19,37 +20,67 @@ resource "google_storage_bucket_object" "funcao_script" {
 }
 
 
-resource "google_cloudfunctions_function" "funcao_ingest" {
-  name                  = "${var.project_id}-funcao_ingest"
-  description           = "Processa novos arquivos do bucket ${google_storage_bucket.lake.name}"
-  runtime               = "python312"
-  available_memory_mb   = 512
-  source_archive_bucket = google_storage_bucket.lake.name
-  source_archive_object = google_storage_bucket_object.funcao_script.name
-  entry_point           = "main"
-  service_account_email = google_service_account.contaservico.email
-  timeout               = 60
+resource "google_cloudfunctions2_function" "funcao_ingest" {
+  name = "${var.project_id}-funcao_ingest"
+  location = var.gcp_region 
+  description = "Processa novos arquivos do bucket ${google_storage_bucket.lake.name}"
 
-  event_trigger {
-    event_type = "google.storage.object.finalize"
-    resource   = google_storage_bucket.lake.name
+  build_config {
+    runtime = "python312"
+    entry_point = "main"
+    source {
+      storage_source {
+        bucket = google_storage_bucket.lake.name
+        object = google_storage_bucket_object.funcao_script.name
+      }
+    }
   }
 
-  environment_variables = {
-    BUCKET_NAME = google_storage_bucket.lake.name
-    DATASET_ID = google_bigquery_dataset.dataset_dw.dataset_id
-    PROJECT_ID  = var.project_id
+  service_config {
+    available_memory      = "512M"
+    timeout_seconds       = 60
+    service_account_email = google_service_account.contaservico.email
+    environment_variables = {
+      BUCKET_NAME = google_storage_bucket.lake.name
+      DATASET_ID  = google_bigquery_dataset.dataset_dw.dataset_id
+      PROJECT_ID  = var.project_id
+    }
   }
+
+  labels = {
+      environment = var.environment
+      project_id  = var.project_id
+      pipeline    = "ingestao-dados"
+    }
 
   depends_on = [
     google_project_service.funcao_apis_necessarias,
     google_storage_bucket_iam_member.permissao_admin_bucket,
     google_bigquery_dataset.dataset_dw
   ]
+}
 
-  labels = {
-    environment = var.environment,
-    project_id  = var.project_id
-    pipeline = "ingestao-dados"
+# Novo recurso para configurar o trigger do Eventarc
+resource "google_eventarc_trigger" "storage_trigger" {
+  name     = "${var.project_id}-storage-trigger"
+  location = var.gcp_region
+  matching_criteria {
+    attribute = "type"
+    value     = "google.cloud.storage.object.v1.finalized"
   }
+  matching_criteria {
+    attribute = "bucket"
+    value     = google_storage_bucket.lake.name
+  }
+  destination {
+    cloud_run_service {
+      service = google_cloudfunctions2_function.funcao_ingest.name
+      region  = var.gcp_region
+    }
+  }
+  service_account = google_service_account.contaservico.email
+  depends_on = [
+    google_project_service.funcao_apis_necessarias,
+    google_cloudfunctions2_function.funcao_ingest
+  ]
 }
