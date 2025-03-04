@@ -44,7 +44,7 @@ jobs:
     
     # mudar de pasta
     - name: Change directory
-      run: cd terraform
+      run: cd infrastructure
 
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v2
