@@ -54,9 +54,18 @@ resource "google_project_iam_member" "permissao_service_agent" {
   project = var.project_id
   role    = "roles/cloudfunctions.serviceAgent"
   member  = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-cloudfunctions.iam.gserviceaccount.com"
+  depends_on = [
+    google_project_service.funcao_apis_necessarias["cloudfunctions.googleapis.com"],
+    time_sleep.wait_for_service_agent
+  ]
 }
 
 data "google_project" "project" {}
+
+resource "time_sleep" "wait_for_service_agent" {
+  create_duration = "2m"
+  depends_on = [google_project_service.funcao_apis_necessarias]
+}
 
 resource "google_project_iam_member" "permissao_token_creator" {
   project = var.project_id
