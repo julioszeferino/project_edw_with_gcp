@@ -77,6 +77,10 @@ resource "google_bigquery_table" "tabela_vendas" {
 ]
 EOF
 
+  lifecycle {
+    ignore_changes = [schema]  
+  }
+
   labels = {
     environment = var.environment,
     project_id  = var.project_id
@@ -291,6 +295,10 @@ resource "google_bigquery_table" "tabela_fluxo_caixa" {
 ]
 EOF
 
+  lifecycle {
+    ignore_changes = [schema]  
+  }
+
   labels = {
     environment = var.environment,
     project_id  = var.project_id
@@ -414,6 +422,10 @@ resource "google_bigquery_table" "tabela_dre" {
 ]
 EOF
 
+  lifecycle {
+    ignore_changes = [schema]  
+  }
+  
   labels = {
     environment = var.environment,
     project_id  = var.project_id
