@@ -29,21 +29,3 @@ resource "google_project_iam_member" "permissao_user_bigquery" {
   member  = "serviceAccount:${google_service_account.contaservico.email}"
   depends_on = [google_service_account.contaservico]
 }
-
-resource "google_cloudfunctions2_function_iam_member" "invoker" {
-  project        = google_cloudfunctions2_function.funcao_ingest.project
-  location       = google_cloudfunctions2_function.funcao_ingest.location
-  cloud_function = google_cloudfunctions2_function.funcao_ingest.name
-  role           = "roles/cloudfunctions.invoker"
-  member         = "serviceAccount:${google_service_account.contaservico.email}"
-  depends_on = [google_cloudfunctions2_function.funcao_ingest]
-}
-
-resource "google_cloud_run_service_iam_member" "cloud_run_invoker" {
-  project  = google_cloudfunctions2_function.funcao_ingest.project
-  location = google_cloudfunctions2_function.funcao_ingest.location
-  service  = google_cloudfunctions2_function.funcao_ingest.name
-  role     = "roles/run.invoker"
-  member   = "serviceAccount:${google_service_account.contaservico.email}"
-  depends_on = [google_cloudfunctions2_function.funcao_ingest]
-}
