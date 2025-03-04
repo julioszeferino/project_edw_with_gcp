@@ -30,34 +30,25 @@ resource "google_project_iam_member" "permissao_user_bigquery" {
   depends_on = [google_service_account.contaservico]
 }
 
-resource "google_project_iam_member" "permissao_run_invoker" {
-  project = var.project_id
-  role    = "roles/run.invoker"
-  member  = "serviceAccount:${google_service_account.contaservico.email}"
-  depends_on = [google_service_account.contaservico]
+resource "google_cloudfunctions2_function_iam_member" "invoker" {
+  project        = google_cloudfunctions2_function.funcao_ingest.project
+  location       = google_cloudfunctions2_function.funcao_ingest.location
+  cloud_function = google_cloudfunctions2_function.funcao_ingest.name
+  role           = "roles/cloudfunctions.invoker"
+  member         = "serviceAccount:${google_service_account.contaservico.email}"
 }
 
-resource "google_project_iam_member" "permissao_eventarc_receiver" {
-  project = var.project_id
-  role    = "roles/eventarc.eventReceiver"
-  member  = "serviceAccount:${google_service_account.contaservico.email}"
-}
-
-resource "google_cloud_run_service_iam_member" "permissao_exec_function" {
+resource "google_cloud_run_service_iam_member" "cloud_run_invoker" {
+  project  = google_cloudfunctions2_function.funcao_ingest.project
   location = google_cloudfunctions2_function.funcao_ingest.location
   service  = google_cloudfunctions2_function.funcao_ingest.name
   role     = "roles/run.invoker"
   member   = "serviceAccount:${google_service_account.contaservico.email}"
-  depends_on = [
-    google_cloudfunctions2_function.funcao_ingest,
-    google_service_account.contaservico,
-    google_eventarc_trigger.storage_trigger
-  ]
 }
 
 
-resource "google_project_iam_member" "permissao_eventarc" {
+resource "google_project_iam_member" "eventarc_invoker" {
   project = var.project_id
-  role    = "roles/eventarc.admin"
+  role    = "roles/eventarc.eventReceiver"
   member  = "serviceAccount:${google_service_account.contaservico.email}"
 }
