@@ -4,6 +4,7 @@ from google.cloud import storage, bigquery
 import functions_framework
 import logging
 import io
+import unicodedata
 
 # Configuração de logging
 logging.basicConfig(level=logging.INFO)
@@ -11,6 +12,13 @@ logging.basicConfig(level=logging.INFO)
 
 BUCKET_NAME = os.getenv('BUCKET_NAME')
 DATASET_ID = f"{os.getenv('PROJECT_ID')}.{os.getenv('DATASET_ID')}"
+
+def remover_acentos(texto):
+    # Substitui 'ç' antes da normalização
+    texto = texto.replace("ç", "c").replace("Ç", "C")
+    # Normaliza e remove acentos
+    texto = unicodedata.normalize('NFKD', texto).encode('ASCII', 'ignore').decode('utf-8')
+    return texto
 
 
 def extract_table_and_anomes(file_name):
@@ -95,8 +103,7 @@ def process_file(file_name, storage_client, bq_client):
         logging.info(f"Adiciona a coluna anomes aos dados")
         lines = data.splitlines()
         header = lines[0] + f",{col_ref}"
-        rows = [f"{line},{anomes}" for line in lines[1:]]
-        # row = io.StringIO("\n".join(rows))
+        rows = [f"{remover_acentos(line)},{anomes}" for line in lines[1:]]
 
         csv_data = "\n".join(rows).encode("utf-8")
         row = io.BytesIO(csv_data) 
@@ -106,7 +113,6 @@ def process_file(file_name, storage_client, bq_client):
         job_config = bigquery.LoadJobConfig(
             source_format=bigquery.SourceFormat.CSV,
             skip_leading_rows=0,
-            # autodetect=True,
             field_delimiter=',',
             encoding='UTF-8',
             write_disposition=bigquery.WriteDisposition.WRITE_APPEND,
