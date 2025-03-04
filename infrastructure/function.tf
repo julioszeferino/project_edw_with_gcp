@@ -12,6 +12,12 @@ resource "google_project_service" "funcao_apis_necessarias" {
 }
 
 
+resource "google_project_service" "service_usage_api" {
+  service = "serviceusage.googleapis.com"
+  disable_on_destroy = false
+}
+
+
 resource "google_storage_bucket_object" "funcao_script" {
   name   = "scripts/function-source.zip"
   bucket = google_storage_bucket.lake.name
@@ -22,7 +28,7 @@ resource "google_storage_bucket_object" "funcao_script" {
 
 resource "google_cloudfunctions2_function" "funcao_ingest" {
   name = "${var.project_id}-funcao_ingest"
-  location = "US"
+  location = var.gcp_region
   description = "Processa novos arquivos do bucket ${google_storage_bucket.lake.name}"
 
   build_config {
@@ -81,6 +87,7 @@ resource "google_eventarc_trigger" "storage_trigger" {
   service_account = google_service_account.contaservico.email
   depends_on = [
     google_project_service.funcao_apis_necessarias,
-    google_cloudfunctions2_function.funcao_ingest
+    google_cloudfunctions2_function.funcao_ingest,
+    google_project_iam_member.permissao_eventarc
   ]
 }

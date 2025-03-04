@@ -40,5 +40,7 @@ jobs:
         $COMMAND_IAC init 
         $COMMAND_IAC validate -no-color
         $COMMAND_IAC plan -no-color
+        $COMMAND_IAC apply -target=google_project_service.funcao_apis_necessarias
+        $COMMAND_IAC destroy -auto-approve
         $COMMAND_IAC apply -auto-approve
       
