@@ -37,7 +37,7 @@ jobs:
         COMMAND_IAC: terraform
       run: |
         cd infrastructure 
-        $COMMAND_IAC init -backend-config="bucket=$GOOGLE_BACKEND_BUCKET"
+        $COMMAND_IAC init 
         $COMMAND_IAC validate -no-color
         $COMMAND_IAC plan -no-color
         $COMMAND_IAC apply -auto-approve
