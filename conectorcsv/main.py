@@ -10,7 +10,7 @@ logging.basicConfig(level=logging.INFO)
 
 
 BUCKET_NAME = os.getenv('BUCKET_NAME')
-DATASET_ID = os.getenv('DATASET_ID')
+DATASET_ID = f"{os.getenv('PROJECT_ID')}.{os.getenv('DATASET_ID')}"
 
 
 def extract_table_and_anomes(file_name):
@@ -66,9 +66,11 @@ def process_file(file_name, storage_client, bq_client):
     """
     try:
         # Extrai o nome da tabela e o anomes do nome do arquivo
+        logging.info(f"Extraindo o a competencia do arquivo {file_name}.")
         table_name, anomes, col_ref = extract_table_and_anomes(file_name)
         if not table_name or not anomes:
             return
+        logging.info(f"Competencia: {anomes}.")
 
         logging.info(f"Verifica se a competência {anomes} já existe na tabela {DATASET_ID}.{table_name}.")
         query = f"""
@@ -129,17 +131,6 @@ def process_file(file_name, storage_client, bq_client):
         logging.error(f"Erro ao processar o arquivo {file_name}: {str(e)}")
 
 
-def process_folder(folder_name, storage_client, bq_client):
-    # Lista todos os arquivos na pasta e subpastas
-    bucket = storage_client.bucket(BUCKET_NAME)
-    blobs = bucket.list_blobs(prefix=folder_name)
-
-    for blob in blobs:
-        if not blob.name.endswith("_SUCCESS.csv") and blob.name.endswith(".csv"):
-            print(f"Processando arquivo: {blob.name}")
-            process_file(blob.name, storage_client, bq_client)
-
-
 @functions_framework.http
 def main(request):
     """
@@ -161,6 +152,7 @@ def main(request):
         else:
             logging.error("Nome do arquivo não fornecido na requisição.")
             return "Nome do arquivo não fornecido.", 400
+
 
         # Processa o arquivo
         if not file_name.endswith("_SUCCESS.csv") and file_name.endswith(".csv"):
