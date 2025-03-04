@@ -69,7 +69,7 @@ resource "google_cloudfunctions2_function" "funcao_ingest" {
 # Novo recurso para configurar o trigger do Eventarc
 resource "google_eventarc_trigger" "storage_trigger" {
   name     = "${var.project_id}-storage-trigger"
-  location = "US"
+  location = var.gcp_region
   matching_criteria {
     attribute = "type"
     value     = "google.cloud.storage.object.v1.finalized"
