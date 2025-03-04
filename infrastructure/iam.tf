@@ -51,7 +51,7 @@ resource "google_cloudfunctions2_function_iam_member" "permissao_invoker" {
 resource "google_cloud_run_service_iam_member" "eventarc_invoker" {
   location = var.gcp_region
   project  = var.project_id
-  service  = google_cloudfunctions2_function.funcao_ingest.name
+  service  = google_cloudfunctions2_function.funcao_ingest.service_config[0].service
 
   role   = "roles/run.invoker"
   member = "serviceAccount:${google_service_account.contaservico.email}"
