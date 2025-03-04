@@ -1,0 +1,44 @@
+name: deploy
+
+on:
+  push:
+    branches: [ "master" ]
+
+env:
+  TF_VAR_project_id: ${{ secrets.GCP_PROJECT_ID }}
+  GOOGLE_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
+  GOOGLE_REGION: us-central1
+  GOOGLE_BACKEND_BUCKET: terraform-state-infra-julioszeferino
+
+jobs:
+
+  deploy:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: ['ubuntu-22.04']
+    
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Build app
+      run: |
+        sh init.sh
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v2
+      with:
+        terraform_version: 1.5.7
+
+    - name: IaC Plan
+      env:
+        GOOGLE_BACKEND_BUCKET: ${{ env.GOOGLE_BACKEND_BUCKET }}
+        COMMAND_IAC: terraform
+      run: |
+        cd infrastructure 
+        $COMMAND_IAC init -backend-config="bucket=$GOOGLE_BACKEND_BUCKET"
+        $COMMAND_IAC validate -no-color
+        $COMMAND_IAC plan -no-color
+        $COMMAND_IAC apply -auto-approve
+      
