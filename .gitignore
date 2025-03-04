@@ -1,0 +1,12 @@
+credentials.json
+.terraform
+terraform.tfstate
+terraform.tfstate.backup
+.terraform.lock.hcl
+venv/
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+.pytest_cache/
+.pyre/
