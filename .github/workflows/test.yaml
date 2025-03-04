@@ -49,15 +49,15 @@ jobs:
 
     - name: Terraform Init
       id: init
-      run: terraform init -backend-config="bucket=$GOOGLE_BACKEND_BUCKET"
+      run: cd infrastructure && terraform init -backend-config="bucket=$GOOGLE_BACKEND_BUCKET"
       env:
         GOOGLE_BACKEND_BUCKET: ${{ env.GOOGLE_BACKEND_BUCKET }}
 
     - name: Terraform Validate
       id: validate
-      run: terraform validate -no-color
+      run: cd infrastructure && terraform validate -no-color
 
     - name: Terraform Plan
       id: plan
-      run: terraform plan -no-color
+      run: cd infrastructure && terraform plan -no-color
       continue-on-error: false
