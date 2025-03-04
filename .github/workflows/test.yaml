@@ -41,7 +41,11 @@ jobs:
     - name: Build app
       run: |
         sh init.sh
-        
+    
+    # mudar de pasta
+    - name: Change directory
+      run: cd terraform
+
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v2
       with:
@@ -49,15 +53,15 @@ jobs:
 
     - name: Terraform Init
       id: init
-      run: cd infrastructure && terraform init -backend-config="bucket=$GOOGLE_BACKEND_BUCKET"
+      run: terraform init -backend-config="bucket=$GOOGLE_BACKEND_BUCKET"
       env:
         GOOGLE_BACKEND_BUCKET: ${{ env.GOOGLE_BACKEND_BUCKET }}
 
     - name: Terraform Validate
       id: validate
-      run: cd infrastructure && terraform validate -no-color
+      run: terraform validate -no-color
 
     - name: Terraform Plan
       id: plan
-      run: cd infrastructure && terraform plan -no-color
+      run: terraform plan -no-color
       continue-on-error: false
