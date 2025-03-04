@@ -74,6 +74,6 @@ resource "google_cloudfunctions2_function" "funcao_ingest" {
     google_bigquery_dataset.dataset_dw,
     google_storage_bucket.lake,
     google_storage_bucket_object.funcao_script,
-    google_project_iam_member.permissao_eventarc_invoker
+    google_project_iam_member.permissao_eventarc_invoker,
     ]
 }
