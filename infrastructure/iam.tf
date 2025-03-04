@@ -31,6 +31,13 @@ resource "google_project_iam_member" "permissao_user_bigquery" {
 }
 
 
+resource "google_project_iam_member" "permissao_eventarc_invoker" {
+  project = var.project_id
+  role    = "roles/eventarc.eventReceiver"
+  member  = "serviceAccount:${google_service_account.contaservico.email}"
+}
+
+
 resource "google_cloud_run_service_iam_member" "permissao_invoker" {
   project  = google_cloudfunctions2_function.funcao_ingest.project
   location = google_cloudfunctions2_function.funcao_ingest.location
