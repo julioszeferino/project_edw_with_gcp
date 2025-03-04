@@ -22,7 +22,7 @@ resource "google_storage_bucket_object" "funcao_script" {
 
 resource "google_cloudfunctions2_function" "funcao_ingest" {
   name = "${var.project_id}-funcao_ingest"
-  location = var.gcp_region 
+  location = "US"
   description = "Processa novos arquivos do bucket ${google_storage_bucket.lake.name}"
 
   build_config {
@@ -63,7 +63,7 @@ resource "google_cloudfunctions2_function" "funcao_ingest" {
 # Novo recurso para configurar o trigger do Eventarc
 resource "google_eventarc_trigger" "storage_trigger" {
   name     = "${var.project_id}-storage-trigger"
-  location = var.gcp_region
+  location = "US"
   matching_criteria {
     attribute = "type"
     value     = "google.cloud.storage.object.v1.finalized"

@@ -38,7 +38,8 @@ resource "google_cloud_run_service_iam_member" "permissao_exec_function" {
   member   = "serviceAccount:${google_service_account.contaservico.email}"
   depends_on = [
     google_cloudfunctions2_function.funcao_ingest,
-    google_service_account.contaservico
+    google_service_account.contaservico,
+    google_eventarc_trigger.storage_trigger
   ]
 }
 
