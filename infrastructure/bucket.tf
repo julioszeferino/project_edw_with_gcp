@@ -1,7 +1,7 @@
 resource "google_storage_bucket" "lake" {
 
   name          = "${var.project_id}-${var.bucket_name}" 
-  location      = "us"
+  location      = var.gcp_region
   storage_class = "STANDARD"
   force_destroy = var.environment == "prod" ? false : true 
   public_access_prevention = "enforced"
