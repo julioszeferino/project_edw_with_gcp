@@ -1,11 +1,11 @@
 # Enterprise DW com BigQuery
 
-> Este pipeline foi criado com o objetivo de entregar um fluxo de dados funcional no gpc com baixo custo e que, a depender da volumetria, pode se encaixar no free-tier da GCP por um bom tempo.
+> Este pipeline foi desenvolvido com o objetivo de fornecer um fluxo de dados eficiente e de baixo custo no GCP. Dependendo da volumetria, é possível que ele se enquadre no free-tier da GCP ou seja executado com um valor reduzido por um período considerável.
 
 - O Fluxo de dados é orientado a eventos. Os dados são movimentados para o DW à medida que chegam ao bucket.
-- O pipeline utiliza uma função no `Cloud Run` para servir como "listener" e realizar a inserção dos dados no bigquery.
+- O pipeline utiliza uma função no `Cloud Run` para servir como "listener" e realizar a inserção dos dados no `BigQuery`.
 - Os dados de entrada são armazenados no `GCP Storage`
-- Os dados são armazenados no `BigQuery`.
+- Os dados finais são armazenados no `BigQuery`.
 - Toda a execução do projeto é orquestrada pelo `GCP Cloud Functions`.
 - Ao final, a análise dos dados é disponibilizada via `Looker`.
   
@@ -25,7 +25,7 @@
 - O projeto visa uma arquitetura de dados de **baixo custo**, projetada para iniciativas de **pequeno porte**, porém com **capacidade de escalonamento contínuo** conforme o aumento da volumetria e das demandas analíticas. A estrutura proposta serve como base para iniciativas de Business Intelligence (BI), combinando simplicidade operacional e preparação para evolução tecnológica.
 - A escolha do `Google Cloud Storage` como camada de ingestão prioriza **redução de custos e flexibilidade**. O free-tier oferece 5GB gratuitos, ideal para cenários iniciais, com cobrança proporcional ao crescimento. Os dados são armazenados em formato bruto (CSV), organizados por tabelas e domínios, o que **mantém a fidelidade aos dados originais, facilita a transição para um modelo de lakehouse e permite uma gestão modular (ou por domínios), onde novos dados podem ser incorporados sem impactar pipelines existentes.**
 - `Python` é a linguagem mais utilizada em projetos de dados, com bibliotecas consolidadas e compatibilidade com ecossistemas modernos. O modelo de computação sem servidor do `Cloud Run` complementa essa escolha com **custo adaptável, escalabilidade automática e orquestração via eventos**. No projeto, a escolha por um trigger que aciona a função à medida que os arquivos entram no storage torna a entrega dos dados ágil e dinâmica, alé de muito intuitiva.
-- O Google `BigQuery` é um dos provedores de DW mais conhecidos do mercado. Escalável e facilmente integrado à maior parte das ferramentas de BI, sua performance e custo é uma das que mais trazem benefícios. O free-tier permite o armazenamento de até 30gb's gratuitos e o as queries são precificadas pelo uso.
+- O Google `BigQuery` é um dos provedores de DW mais conhecidos do mercado. Escalável e facilmente integrado à maior parte das ferramentas de BI, sua performance e custo é uma das que mais trazem benefícios. O free-tier permite o armazenamento de até 10gb's gratuitos e o as queries são precificadas pelo uso.
 - O `Looker` é a ferramenta de BI do GCP, mesmo que muito simples em termos de recursos, atende a maioria das necessidades de análise sem que seja necessário buscar ferramentas terceiras além de ter integração direta com o bigquery.
 - Essa combinação entre custo inicial mínimo, tecnologias gerenciadas e abertura para inovações posiciona o projeto como uma solução sustentável, capaz de acompanhar a maturidade analítica da organização sem rupturas tecnológicas.
 
@@ -95,7 +95,7 @@
 
 
 ## Indicações de Melhorias
-- Criar mais integrações de funções no cloud run para outros formatos de arquivos.
+- Criar mais integrações de funções no cloud run para outros formatos de arquivos. A função e as transformações aplicadas podem ser adequadas ao cenário de negócio.
 - A medida que os fluxos de dados crescerem utilizar uma ferramenta como o Apache Airflow para realizar a orquestração dos pipelines.
 - Modelagem dos dados do DW com o objetivo de performance nas análises dos dados.
 - Estruturação de um Lakehouse.
